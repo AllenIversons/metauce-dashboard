@@ -13,6 +13,5 @@ type RankingInfo struct {
 
 type DBService interface {
 	PutPower(address common.Address, power int) error
-	Flush() error
 	GetRanking() []db.AddressInfo //return list of addressinfo sorted by power
 }
