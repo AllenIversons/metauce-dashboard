@@ -2,3 +2,4 @@
 *.log
 db/db_test.go
 consts.go
+metauce-dashboard

@@ -7,8 +7,10 @@ import (
 	"gopkg.in/urfave/cli.v1"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"metauce-dashboard/consts"
 	db2 "metauce-dashboard/db"
-	"metauce-dashboard/types"
+	"metauce-dashboard/restful"
+	tracker2 "metauce-dashboard/tracker"
 	"os"
 	"os/signal"
 	"syscall"
@@ -32,7 +34,9 @@ var app *cli.App
 var Duration int = 0
 var MetisUrl = "https://stardust.metis.io/?owner=588"
 var Port = "8547"
-var ContractAddressStrList = []string{"", ""}
+var CodeContractStr = "0xE5547D0378944B786BB38fB1bea4027052FC883E"
+var PlayContractStr = "0x7Ab359a33F14C23571f79b62f1B8a5dc510c8070"
+
 var (
 	portFlag = cli.StringFlag{
 		Name:  "port",
@@ -49,20 +53,24 @@ var (
 		Usage: "track cycle duration",
 		Value: 1440,
 	}
+	codeFlag = cli.StringFlag{
+		Name:  "code",
+		Usage: "code contract address",
+		Value: "0xE5547D0378944B786BB38fB1bea4027052FC883E",
+	}
+	playFlag = cli.StringFlag{
+		Name:  "play",
+		Usage: "play contract address",
+		Value: "0x7Ab359a33F14C23571f79b62f1B8a5dc510c8070",
+	}
 )
 
-type Tracker interface {
-	start() error
-	close() error
-	GetRankingList() ([]types.AddressRank, error)
-	GetAddressRank(address common.Address) (types.AddressRank, error)
-}
-
 type ConfigYml struct {
-	Url             string   `yaml:"url"`
-	Duration        int      `yaml:"duration"`
-	Port            string   `yaml:"port"`
-	ContractAddress []string `yaml:"contract_address"`
+	Url          string `yaml:"url"`
+	Duration     int    `yaml:"duration"`
+	Port         string `yaml:"port"`
+	CodeContract string `yaml:"code_contract"`
+	PlayContract string `yaml:"play_contract"`
 }
 
 func init() {
@@ -73,6 +81,8 @@ func init() {
 		portFlag,
 		configFlag,
 		durationFlag,
+		codeFlag,
+		playFlag,
 	}
 
 	cli.CommandHelpTemplate = OriginCommandHelpTemplate
@@ -85,8 +95,7 @@ func main() {
 	}
 }
 
-func Start(ctx cli.Context) {
-	contractAddressList := make([]common.Address, 0)
+func Start(ctx *cli.Context) {
 	configPath := ctx.String(configFlag.Name)
 	b, err := ioutil.ReadFile(configPath)
 	if err != nil && ctx.IsSet(configFlag.Name) {
@@ -111,10 +120,12 @@ func Start(ctx cli.Context) {
 			Duration = configYml.Duration
 		}
 
-		if len(configYml.ContractAddress) != 0 {
-			for _, addrStr := range configYml.ContractAddress {
-				contractAddressList = append(contractAddressList, common.HexToAddress(addrStr))
-			}
+		if configYml.CodeContract != "" {
+			CodeContractStr = configYml.CodeContract
+		}
+
+		if configYml.PlayContract != "" {
+			PlayContractStr = configYml.PlayContract
 		}
 	}
 
@@ -126,23 +137,37 @@ func Start(ctx cli.Context) {
 		Duration = ctx.Int(durationFlag.Name)
 	}
 
-	if len(contractAddressList) == 0 {
-		for _, addrStr := range ContractAddressStrList {
-			contractAddressList = append(contractAddressList, common.HexToAddress(addrStr))
-		}
+	if ctx.IsSet(codeFlag.Name) {
+		CodeContractStr = ctx.String(codeFlag.Name)
+	}
+
+	if ctx.IsSet(playFlag.Name) {
+		PlayContractStr = ctx.String(playFlag.Name)
 	}
 
 	//init DB service
-	dbService, err := db2.Init(dbpassword, dburl)
+	dbService, err := db2.Init(consts.Dbpassword, consts.Dburl)
 	if err != nil {
 		utils.Fatalf("init db service error %v", err)
 	}
 	defer dbService.Close()
 
 	//init start tracker
+	codeContract := common.HexToAddress(CodeContractStr)
+	playContract := common.HexToAddress(PlayContractStr)
+	tracker := tracker2.Init(dbService, MetisUrl, playContract, codeContract, Duration)
+	err = tracker.Start()
+	if err != nil {
+		utils.Fatalf("start tracker error %v", err)
+	}
+	defer tracker.Close()
 
 	//init and start restful rpc
-
+	rpcServer := restful.Init(Port, tracker)
+	err = rpcServer.Start()
+	if err != nil {
+		utils.Fatalf("start rpc server error %v", err)
+	}
 	waitToExit()
 }
 
