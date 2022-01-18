@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	_ "github.com/go-sql-driver/mysql"
@@ -9,14 +10,19 @@ import (
 
 type AddressInfo struct {
 	Address common.Address
-	Power   int
+	Power   float64
 }
 
 type powerRow struct {
-	id        int
-	address   string
-	power     int
-	timestamp int
+	id          int
+	address     string
+	total_power float64
+	timestamp   int
+	carcnt      int
+	mapcnt      int
+	carpower    float64
+	mapremain   float64
+	mapmined    float64
 }
 
 type DBService struct {
@@ -42,7 +48,7 @@ func (db *DBService) Close() error {
 }
 
 func (db *DBService) PutPower(address common.Address, power int, timestamp int) error {
-	sqlStr := "INSERT INTO power(address, power, timestamp) values (?,?,?) ON DUPLICATE KEY UPDATE address=?, power=?, timestamp=?"
+	sqlStr := "INSERT INTO userinfo(address, total_power, timestamp) values (?,?,?) ON DUPLICATE KEY UPDATE address=?, total_power=?, timestamp=?"
 	addrStr := address.String()
 	_, err := db.db.Exec(sqlStr, addrStr, power, timestamp, addrStr, power, timestamp)
 	if err != nil {
@@ -53,7 +59,7 @@ func (db *DBService) PutPower(address common.Address, power int, timestamp int) 
 }
 
 func (db *DBService) GetRanking() ([]AddressInfo, error) {
-	sqlStr := "SELECT * from power ORDER BY power DESC"
+	sqlStr := "SELECT * from userinfo ORDER BY total_power DESC"
 	rows, err := db.db.Query(sqlStr)
 	if err != nil {
 		log.Error("db get ranking error", "err", err)
@@ -65,14 +71,15 @@ func (db *DBService) GetRanking() ([]AddressInfo, error) {
 
 	for rows.Next() {
 		var r powerRow
-		e := rows.Scan(&r.id, &r.address, &r.power, &r.timestamp)
+		e := rows.Scan(&r.id, &r.address, &r.total_power, &r.timestamp, &r.carcnt, &r.mapcnt, &r.carpower, &r.mapremain, &r.mapmined)
+		fmt.Println(r.mapremain)
 		if e != nil {
 			log.Error("db row scan error", "err", e)
 			return nil, e
 		}
 		addrList = append(addrList, AddressInfo{
 			Address: common.HexToAddress(r.address),
-			Power:   r.power,
+			Power:   r.total_power,
 		})
 	}
 

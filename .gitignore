@@ -1,2 +1,4 @@
 .idea
 *.log
+db/db_test.go
+consts.go

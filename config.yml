@@ -1,0 +1,6 @@
+url: "https://stardust.metis.io/?owner=588"
+duration: 5
+port: 8546
+contract_address:
+  - "0x7Ab359a33F14C23571f79b62f1B8a5dc510c8070"
+  - "0xE5547D0378944B786BB38fB1bea4027052FC883E"
