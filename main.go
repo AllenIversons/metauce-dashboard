@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	db2 "metauce-dashboard/db"
+	"metauce-dashboard/types"
 	"os"
 	"os/signal"
 	"syscall"
@@ -49,6 +50,13 @@ var (
 		Value: 1440,
 	}
 )
+
+type Tracker interface {
+	start() error
+	close() error
+	GetRankingList() ([]types.AddressRank, error)
+	GetAddressRank(address common.Address) (types.AddressRank, error)
+}
 
 type ConfigYml struct {
 	Url             string   `yaml:"url"`

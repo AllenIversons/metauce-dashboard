@@ -6,12 +6,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	_ "github.com/go-sql-driver/mysql"
+	"metauce-dashboard/types"
 )
-
-type AddressInfo struct {
-	Address common.Address
-	Power   float64
-}
 
 type powerRow struct {
 	id          int
@@ -47,10 +43,11 @@ func (db *DBService) Close() error {
 	return db.db.Close()
 }
 
-func (db *DBService) PutPower(address common.Address, power int, timestamp int) error {
-	sqlStr := "INSERT INTO userinfo(address, total_power, timestamp) values (?,?,?) ON DUPLICATE KEY UPDATE address=?, total_power=?, timestamp=?"
+func (db *DBService) PutPower(address common.Address, total_power int, timestamp int, carcnt int, mapcnt int, carpower float64, mapremain float64, mapmined float64) error {
+	sqlStr := "INSERT INTO userinfo(address, total_power, timestamp, carcnt, mapcnt, carpower, mapremain, mapmined) values (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE address=?, total_power=?, timestamp=?, carcnt=?, mapcnt=?, carpower=?, mapremain=?, mapmined=?"
 	addrStr := address.String()
-	_, err := db.db.Exec(sqlStr, addrStr, power, timestamp, addrStr, power, timestamp)
+	_, err := db.db.Exec(sqlStr, addrStr, total_power, timestamp, carcnt, mapcnt, carpower, mapremain, mapmined,
+		addrStr, total_power, timestamp, carcnt, mapcnt, carpower, mapremain, mapmined)
 	if err != nil {
 		log.Error("db put power err", "err", err)
 		return err
@@ -58,7 +55,7 @@ func (db *DBService) PutPower(address common.Address, power int, timestamp int) 
 	return nil
 }
 
-func (db *DBService) GetRanking() ([]AddressInfo, error) {
+func (db *DBService) GetRanking() ([]types.AddressInfo, error) {
 	sqlStr := "SELECT * from userinfo ORDER BY total_power DESC"
 	rows, err := db.db.Query(sqlStr)
 	if err != nil {
@@ -67,7 +64,7 @@ func (db *DBService) GetRanking() ([]AddressInfo, error) {
 	}
 	defer rows.Close()
 
-	addrList := make([]AddressInfo, 0)
+	addrList := make([]types.AddressInfo, 0)
 
 	for rows.Next() {
 		var r powerRow
@@ -77,7 +74,7 @@ func (db *DBService) GetRanking() ([]AddressInfo, error) {
 			log.Error("db row scan error", "err", e)
 			return nil, e
 		}
-		addrList = append(addrList, AddressInfo{
+		addrList = append(addrList, types.AddressInfo{
 			Address: common.HexToAddress(r.address),
 			Power:   r.total_power,
 		})
