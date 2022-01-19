@@ -3,6 +3,7 @@ package tracker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -15,6 +16,18 @@ import (
 	"sync/atomic"
 	"time"
 )
+
+const MaxRequestHeight = 5000
+
+type DBService interface {
+	PutPower(address common.Address, total_power float64, timestamp int, carcnt int, mapcnt int, carpower float64, mapremain float64, mapmined float64) error
+	GetRanking() ([]types.AddressInfo, error) //return list of addressinfo sorted by power
+	PutRank(address common.Address, rank int) error
+	GetUsers() ([]common.Address, error)
+	PutUsers(addressList []common.Address) error
+	GetLastUserUpdateHeight() (uint64, error)
+	SetLastUserUpdateHeight(height uint64) error
+}
 
 type RankingInfo struct {
 	Address common.Address
@@ -35,19 +48,23 @@ type CacheInfo struct {
 }
 
 type TrackService struct {
-	db           DBService
-	rpcurl       string
-	playContract common.Address
-	codeContract common.Address
-	userCache    map[common.Address]CacheInfo
-	rankList     []types.AddressRank
-	duration     int
-	running      int32
-	exitCh       chan struct{}
+	db                 DBService
+	rpcurl             string
+	playContract       common.Address
+	codeContract       common.Address
+	userCache          map[common.Address]CacheInfo
+	rankList           []types.AddressRank
+	infoLoopDur        int
+	userLoopDur        int
+	infoLoopRunning    int32
+	getUserLoopRunning int32
+	exitInfoLoopCh     chan struct{}
+	exitGetUserLoopCh  chan struct{}
 }
 
 func (s *TrackService) Start() error {
-	go s.loop()
+	go s.userInfoLoop()
+	go s.getUserLoop()
 	return nil
 }
 
@@ -56,29 +73,31 @@ func (s *TrackService) Close() {
 		if recover() != nil {
 		}
 	}()
-	close(s.exitCh)
-	atomic.StoreInt32(&s.running, int32(0))
+	close(s.exitInfoLoopCh)
+	close(s.exitGetUserLoopCh)
+	atomic.StoreInt32(&s.infoLoopRunning, int32(0))
+	atomic.StoreInt32(&s.getUserLoopRunning, int32(0))
 }
 
-func (s *TrackService) loop() {
+func (s *TrackService) userInfoLoop() {
 	defer func() {
-		atomic.StoreInt32(&s.running, int32(0))
+		atomic.StoreInt32(&s.infoLoopRunning, int32(0))
 	}()
-	dur := time.Minute * time.Duration(s.duration)
-	atomic.StoreInt32(&s.running, int32(1))
+	dur := time.Minute * time.Duration(s.infoLoopDur)
+	atomic.StoreInt32(&s.infoLoopRunning, int32(1))
 	timer := time.NewTimer(dur)
 	log.Info("Start One Cycle")
-	err := s.OneCycle()
+	err := s.OneInfoCheck()
 	if err != nil {
 		log.Error("one cycle failed", "err", err)
 	}
 	for {
 		select {
-		case <-s.exitCh:
+		case <-s.exitInfoLoopCh:
 			timer.Stop()
 			return
 		case <-timer.C:
-			err := s.OneCycle()
+			err := s.OneInfoCheck()
 			if err != nil {
 				log.Error("one cycle failed", "err", err)
 			}
@@ -87,15 +106,17 @@ func (s *TrackService) loop() {
 	}
 }
 
-func (s *TrackService) OneCycle() error {
+func (s *TrackService) OneInfoCheck() error {
 	//get data from contract, update cache and put db
 	cacheSuccess := false
 	for i := 0; i < 10; i++ {
+		fmt.Println("start update cache")
 		err := s.updateCache()
 		if err == nil {
 			cacheSuccess = true
 			break
 		} else {
+			fmt.Println(err)
 			log.Error("update cache error", "err", err)
 		}
 		time.Sleep(time.Second * 10)
@@ -107,11 +128,13 @@ func (s *TrackService) OneCycle() error {
 	//query db, update rank in cache and db
 	rankSuccess := false
 	for i := 0; i < 10; i++ {
+		fmt.Println("start update rank")
 		err := s.updateRank()
 		if err == nil {
 			rankSuccess = true
 			break
 		} else {
+			fmt.Println(err)
 			log.Error("update rank error", "err", err)
 		}
 		time.Sleep(time.Second * 10)
@@ -139,65 +162,63 @@ func (s *TrackService) GetAddressRank(address common.Address) (types.AddressRank
 	}
 }
 
-type DBService interface {
-	PutPower(address common.Address, total_power float64, timestamp int, carcnt int, mapcnt int, carpower float64, mapremain float64, mapmined float64) error
-	GetRanking() ([]types.AddressInfo, error) //return list of addressinfo sorted by power
-	PutRank(address common.Address, rank int) error
-}
-
 func Init(db DBService, rpcurl string, playContract common.Address, codeContract common.Address, duration int) *TrackService {
 	return &TrackService{
-		db:           db,
-		rpcurl:       rpcurl,
-		playContract: playContract,
-		codeContract: codeContract,
-		userCache:    make(map[common.Address]CacheInfo),
-		rankList:     make([]types.AddressRank, 0),
-		duration:     duration,
-		running:      int32(0),
-		exitCh:       make(chan struct{}),
+		db:                 db,
+		rpcurl:             rpcurl,
+		playContract:       playContract,
+		codeContract:       codeContract,
+		userCache:          make(map[common.Address]CacheInfo),
+		rankList:           make([]types.AddressRank, 0),
+		infoLoopDur:        duration,
+		userLoopDur:        10,
+		infoLoopRunning:    int32(0),
+		getUserLoopRunning: int32(0),
+		exitInfoLoopCh:     make(chan struct{}),
+		exitGetUserLoopCh:  make(chan struct{}),
 	}
 }
 
-func (s *TrackService) updateCache() error {
-	log.Info("start update cache")
-	client, err := ethclient.Dial(s.rpcurl)
-	defer client.Close()
-	if err != nil {
-		log.Error("Dial metis rpc error", "err", err, "url", s.rpcurl)
-		return err
-	}
-
-	fromBlock := new(big.Int).SetUint64(128975)
-	userAddress, err := GetUsers(client, fromBlock, []common.Address{s.codeContract, s.playContract})
-	if err != nil {
-		log.Error("GetUsers logs error", "err", err)
-		return err
-	}
-
-	inveiteCodeInstance, err := abi.NewInvitecode(s.codeContract, client)
-	if err != nil {
-		log.Error("Failed to call inveiteCodeInstance contract", err)
-		return err
-	}
-
-	playInstance, err := abi.NewPlay(s.playContract, client)
-	if err != nil {
-		log.Error("Failed to call playInstance contract", err)
-	}
-	for _, v := range userAddress {
-		carPowerSum := big.NewInt(0)
-		codePower, err := inveiteCodeInstance.GetTotalPower(&bind.CallOpts{Pending: false}, v)
+func (s *TrackService) checkOneAddress(addr common.Address) (CacheInfo, error) {
+	for i := 0; i < 10; i++ {
+		if i != 0 {
+			time.Sleep(time.Second)
+		}
+		client, err := ethclient.Dial(s.rpcurl)
 		if err != nil {
+			fmt.Println(err)
+			log.Error("Dial metis rpc error", "err", err, "url", s.rpcurl)
+			continue
+		}
+		inveiteCodeInstance, err := abi.NewInvitecode(s.codeContract, client)
+		if err != nil {
+			fmt.Println(err)
+			log.Error("Failed to call inveiteCodeInstance contract", err)
+			continue
+		}
+
+		playInstance, err := abi.NewPlay(s.playContract, client)
+		if err != nil {
+			fmt.Println(err)
+			log.Error("Failed to call playInstance contract", err)
+			continue
+		}
+
+		fmt.Printf("checking %v\n", addr.String())
+		carPowerSum := big.NewInt(0)
+		codePower, err := inveiteCodeInstance.GetTotalPower(&bind.CallOpts{Pending: false}, addr)
+		if err != nil {
+			fmt.Println(err)
 			log.Error("inveiteCodeInstance GetTotalPower error", "err", err)
-			return err
+			continue
 		}
 		codePower.Div(codePower, big.NewInt(1e+18))
 
-		carsNFT, err := playInstance.GetUserCarNFT(&bind.CallOpts{Pending: false}, v)
+		carsNFT, err := playInstance.GetUserCarNFT(&bind.CallOpts{Pending: false}, addr)
 		if err != nil {
+			fmt.Println(err)
 			log.Error("playInstance GetUserCarNFT error", "err", err)
-			return err
+			continue
 		}
 		carsNum := len(carsNFT)
 
@@ -206,14 +227,15 @@ func (s *TrackService) updateCache() error {
 		}
 		carPowerSum.Div(carPowerSum, big.NewInt(1e+18))
 
-		mapsNFT, err := playInstance.GetUserMapNFT(&bind.CallOpts{Pending: false}, v)
+		mapsNFT, err := playInstance.GetUserMapNFT(&bind.CallOpts{Pending: false}, addr)
 		if err != nil {
+			fmt.Println(err)
 			log.Error("playInstance GetUserMapNFT error", "err", err)
-			return err
+			continue
 		}
 		mapsNum := len(mapsNFT)
 		userInfo := CacheInfo{
-			Address:   v,
+			Address:   addr,
 			Power:     bigToFloat64(codePower) + bigToFloat64(carPowerSum),
 			CodePower: bigToFloat64(codePower),
 			CarPower:  bigToFloat64(carPowerSum),
@@ -223,20 +245,54 @@ func (s *TrackService) updateCache() error {
 			MapRemain: 0,
 			Rank:      0,
 		}
-		s.userCache[v] = userInfo
+		return userInfo, nil
+	}
+	return CacheInfo{}, errors.New("check one info" + addr.String())
+}
 
-		err = s.db.PutPower(v, userInfo.Power, int(time.Now().Unix()), userInfo.CarNums, userInfo.MapNums, userInfo.CarPower, userInfo.MapRemain, userInfo.MapMined)
-		if err != nil {
-			log.Error("db put power error", "err", err)
-			return err
+func (s *TrackService) updateCache() error {
+	log.Info("start update cache")
+	userCache := make(map[common.Address]CacheInfo)
+	userAddress, err := s.db.GetUsers()
+	if err != nil {
+		log.Error("db GetUsers error", "err", err)
+		return err
+	}
+	fmt.Println(len(userAddress))
+	for i, addr := range userAddress {
+		fmt.Println(i)
+		cache, e := s.checkOneAddress(addr)
+		if e != nil {
+			return e
+		}
+		userCache[addr] = cache
+	}
+
+	//put into db
+	for _, userInfo := range userCache {
+		fmt.Println("put db userinfo" + userInfo.Address.String())
+		for i := 0; i < 10; i++ {
+			if i != 0 {
+				time.Sleep(time.Second)
+			}
+			err = s.db.PutPower(userInfo.Address, userInfo.Power, int(time.Now().Unix()), userInfo.CarNums, userInfo.MapNums, userInfo.CarPower, userInfo.MapRemain, userInfo.MapMined)
+			if err != nil {
+				fmt.Println(err)
+				log.Error("db put power error", "err", err)
+				continue
+			} else {
+				break
+			}
 		}
 	}
+
+	s.userCache = userCache
 	return nil
 }
 
 func (s *TrackService) updateRank() error {
 	log.Info("start update rank")
-	s.rankList = make([]types.AddressRank, 0)
+	rankListCache := make([]types.AddressRank, 0)
 	rankList, err := s.db.GetRanking()
 	if err != nil {
 		return err
@@ -247,30 +303,28 @@ func (s *TrackService) updateRank() error {
 			cache.Rank = rank
 			s.userCache[info.Address] = cache
 		}
-		err := s.db.PutRank(info.Address, rank)
-		if err != nil {
-			log.Error("db put rank error", "err", err)
+		fmt.Println(info.Address.String(), rank)
+		e := s.db.PutRank(info.Address, rank)
+		if e != nil {
+			fmt.Println(e)
+			log.Error("db put rank error", "err", e)
 			continue
 		}
-		s.rankList = append(s.rankList, types.AddressRank{
+		rankListCache = append(rankListCache, types.AddressRank{
 			Address: info.Address,
 			Power:   info.Power,
 			Rank:    rank,
 		})
 	}
+	s.rankList = rankListCache
 	return nil
 }
 
-func GetUsers(client *ethclient.Client, fromBlock *big.Int, contractAddresses []common.Address) ([]common.Address, error) {
+func getRecentUsers(client *ethclient.Client, fromBlock *big.Int, toBlock *big.Int, contractAddresses []common.Address) ([]common.Address, error) {
 	log.Info("getting users")
-	currentBlock, err := client.BlockNumber(context.Background())
-	if err != nil {
-		log.Error("client block number error", "err", err)
-		return nil, err
-	}
 	query := ethereum.FilterQuery{
 		FromBlock: fromBlock,
-		ToBlock:   new(big.Int).SetUint64(currentBlock),
+		ToBlock:   toBlock,
 		Addresses: contractAddresses,
 	}
 
@@ -293,6 +347,109 @@ func GetUsers(client *ethclient.Client, fromBlock *big.Int, contractAddresses []
 		usersList = append(usersList, k)
 	}
 	return usersList, nil
+}
+
+func (s *TrackService) getUserLoop() {
+	defer func() {
+		atomic.StoreInt32(&s.getUserLoopRunning, int32(0))
+	}()
+	dur := time.Minute * time.Duration(s.userLoopDur)
+	atomic.StoreInt32(&s.getUserLoopRunning, int32(1))
+	timer := time.NewTimer(dur)
+
+	for {
+		select {
+		case <-s.exitGetUserLoopCh:
+			timer.Stop()
+			return
+		case <-timer.C:
+			timer.Reset(dur)
+			err := s.OneUserCheck()
+			if err != nil {
+				log.Error("OneUserCheck error", "err", err)
+				continue
+			}
+		}
+	}
+}
+
+func (s *TrackService) OneUserCheck() error {
+	//check users
+	users := make([]common.Address, 0)
+	toHeight := uint64(0)
+	checkSuccess := false
+	for i := 0; i < 10; i++ {
+		fmt.Println("check users")
+		if i != 0 {
+			time.Sleep(time.Second * 1)
+		}
+		client, err := ethclient.Dial(s.rpcurl)
+		if err != nil {
+			fmt.Println(err)
+			log.Error("ethclient dial error", "err", err)
+			continue
+		}
+		currentHeight, err := client.BlockNumber(context.Background())
+		if err != nil {
+			fmt.Println(err)
+			log.Error("client blocknumber error", "err", err)
+			continue
+		}
+		fromHeight, err := s.db.GetLastUserUpdateHeight()
+		if err != nil {
+			fmt.Println(err)
+			log.Error("db GetLastUserUpdateHeight error", "err", err)
+			continue
+		}
+
+		if (currentHeight - fromHeight) > MaxRequestHeight {
+			toHeight = fromHeight + MaxRequestHeight
+		} else {
+			toHeight = currentHeight
+		}
+
+		fmt.Printf("from %v to %v\n", fromHeight, toHeight)
+		users, err = getRecentUsers(client, big.NewInt(int64(fromHeight)), big.NewInt(int64(toHeight)), []common.Address{s.codeContract, s.playContract})
+		if err != nil {
+			fmt.Println(err)
+			log.Error("getRecentUsers error", "err", err)
+			continue
+		}
+		checkSuccess = true
+		break
+	}
+	if !checkSuccess {
+		return errors.New("OneUserCheck check users failed")
+	}
+
+	//write db
+	writeSuccess := false
+	for i := 0; i < 10; i++ {
+		fmt.Println("write db")
+		if i != 0 {
+			time.Sleep(time.Second)
+		}
+		err := s.db.PutUsers(users)
+		if err != nil {
+			fmt.Println(err)
+			log.Error("db put users error", "err", err)
+			continue
+		}
+		err = s.db.SetLastUserUpdateHeight(toHeight)
+		if err != nil {
+			fmt.Println(err)
+			log.Error("db SetLastUserUpdateHeight error", "err", err)
+			continue
+		}
+		writeSuccess = true
+		break
+	}
+
+	if writeSuccess {
+		return nil
+	} else {
+		return errors.New("OneUserCheck write db failed")
+	}
 }
 
 func bigToFloat64(num *big.Int) float64 {

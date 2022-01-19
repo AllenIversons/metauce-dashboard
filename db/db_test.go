@@ -47,3 +47,55 @@ func TestDB(t *testing.T) {
 	}
 	fmt.Printf("%v\n", addrList)
 }
+
+func TestDBService_SetLastUserUpdateHeight(t *testing.T) {
+	db, err := Init(consts.Dbpassword, consts.Dburl)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = db.SetLastUserUpdateHeight(uint64(128975))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDBService_GetLastUserUpdateHeight(t *testing.T) {
+	db, err := Init(consts.Dbpassword, consts.Dburl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	height, err := db.GetLastUserUpdateHeight()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(height)
+}
+
+func TestDBService_PutUsers(t *testing.T) {
+	db, err := Init(consts.Dbpassword, consts.Dburl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	users := []string{"0xb9c98869713e83d191b64290f2670CAA4eABE22D", "0x449819f6F560253d8b24f9A38fF14063746429E3", "0xE0bEaC874AC56f4a2cbAc27d73B5ef7a9FB278d3"}
+	userAdddress := make([]common.Address, 0)
+	for _, u := range users {
+		userAdddress = append(userAdddress, common.HexToAddress(u))
+	}
+	err = db.PutUsers(userAdddress)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDBService_GetUsers(t *testing.T) {
+	db, err := Init(consts.Dbpassword, consts.Dburl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	userList, err := db.GetUsers()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(len(userList))
+}

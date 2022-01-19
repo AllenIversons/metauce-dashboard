@@ -2,7 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	_ "github.com/go-sql-driver/mysql"
@@ -22,8 +22,72 @@ type powerRow struct {
 	ranking     int
 }
 
+type LastUpdateHeight struct {
+	id       int
+	getusers int
+}
+
 type DBService struct {
 	db *sql.DB
+}
+
+func (db *DBService) GetUsers() ([]common.Address, error) {
+	userList := make([]common.Address, 0)
+	sqlStr := "SELECT address From userinfo"
+	rows, err := db.db.Query(sqlStr)
+
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var r powerRow
+		e := rows.Scan(&r.address)
+		if e != nil {
+			return nil, e
+		}
+		addr := common.HexToAddress(r.address)
+		userList = append(userList, addr)
+	}
+	return userList, nil
+}
+
+func (db *DBService) PutUsers(addressList []common.Address) error {
+	sqlStr := "INSERT IGNORE INTO userinfo(address) values (?)"
+	for _, address := range addressList {
+		addrStr := address.String()
+		_, err := db.db.Exec(sqlStr, addrStr)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (db *DBService) GetLastUserUpdateHeight() (uint64, error) {
+	sqlStr := "SELECT * from updateheight WHERE id=1"
+	rows, err := db.db.Query(sqlStr)
+	if err != nil {
+		return 0, err
+	}
+
+	var r LastUpdateHeight
+	for rows.Next() {
+		e := rows.Scan(&r.id, &r.getusers)
+		if e != nil {
+			return 0, e
+		}
+		if r.id == 1 {
+			return uint64(r.getusers), nil
+		}
+	}
+
+	return 0, errors.New("no id 1")
+}
+
+func (db *DBService) SetLastUserUpdateHeight(height uint64) error {
+	sqlStr := "update updateheight set getusers=? where id=1"
+	_, err := db.db.Exec(sqlStr, height)
+	return err
 }
 
 func (db *DBService) PutRank(address common.Address, rank int) error {
@@ -80,7 +144,6 @@ func (db *DBService) GetRanking() ([]types.AddressInfo, error) {
 	for rows.Next() {
 		var r powerRow
 		e := rows.Scan(&r.id, &r.address, &r.total_power, &r.timestamp, &r.carcnt, &r.mapcnt, &r.carpower, &r.mapremain, &r.mapmined, &r.ranking)
-		fmt.Println(r.mapremain)
 		if e != nil {
 			log.Error("db row scan error", "err", e)
 			return nil, e
