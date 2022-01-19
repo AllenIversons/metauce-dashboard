@@ -130,6 +130,36 @@ func (db *DBService) PutPower(address common.Address, total_power float64, times
 	return nil
 }
 
+func (db *DBService) GetDetailRanking() ([]types.AddressDetailInfo, error) {
+	sqlStr := "SELECT * from userinfo ORDER BY total_power DESC"
+	rows, err := db.db.Query(sqlStr)
+	if err != nil {
+		log.Error("db get ranking error", "err", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	addrList := make([]types.AddressDetailInfo, 0)
+
+	for rows.Next() {
+		var r powerRow
+		e := rows.Scan(&r.id, &r.address, &r.total_power, &r.timestamp, &r.carcnt, &r.mapcnt, &r.carpower, &r.mapremain, &r.mapmined, &r.ranking)
+		if e != nil {
+			log.Error("db row scan error", "err", e)
+			return nil, e
+		}
+		addrList = append(addrList, types.AddressDetailInfo{
+			Address: common.HexToAddress(r.address),
+			Power:   r.total_power,
+			CarNum:  r.carcnt,
+			MapNum:  r.mapcnt,
+			Rank:    r.ranking,
+		})
+	}
+
+	return addrList, nil
+}
+
 func (db *DBService) GetRanking() ([]types.AddressInfo, error) {
 	sqlStr := "SELECT * from userinfo ORDER BY total_power DESC"
 	rows, err := db.db.Query(sqlStr)

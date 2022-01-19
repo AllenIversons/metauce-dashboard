@@ -3,14 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 	"gopkg.in/urfave/cli.v1"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"metauce-dashboard/consts"
 	db2 "metauce-dashboard/db"
 	"metauce-dashboard/restful"
-	tracker2 "metauce-dashboard/tracker"
 	"os"
 	"os/signal"
 	"syscall"
@@ -31,7 +30,7 @@ OPTIONS:
 
 var app *cli.App
 
-var Duration int = 0
+var Duration int = 24 * 60
 var MetisUrl = "https://stardust.metis.io/?owner=588"
 var Port = "8547"
 var CodeContractStr = "0xE5547D0378944B786BB38fB1bea4027052FC883E"
@@ -146,24 +145,27 @@ func Start(ctx *cli.Context) {
 	}
 
 	//init DB service
+	log.Info("start db service")
 	dbService, err := db2.Init(consts.Dbpassword, consts.Dburl)
 	if err != nil {
+		fmt.Println(err)
 		utils.Fatalf("init db service error %v", err)
 	}
 	defer dbService.Close()
-
-	//init start tracker
-	codeContract := common.HexToAddress(CodeContractStr)
-	playContract := common.HexToAddress(PlayContractStr)
-	tracker := tracker2.Init(dbService, MetisUrl, playContract, codeContract, Duration)
-	err = tracker.Start()
-	if err != nil {
-		utils.Fatalf("start tracker error %v", err)
-	}
-	defer tracker.Close()
+	//
+	//////init start tracker
+	//codeContract := common.HexToAddress(CodeContractStr)
+	//playContract := common.HexToAddress(PlayContractStr)
+	//tracker := tracker2.Init(dbService, MetisUrl, playContract, codeContract, Duration)
+	//err = tracker.Start()
+	//if err != nil {
+	//	utils.Fatalf("start tracker error %v", err)
+	//}
+	//defer tracker.Close()
 
 	//init and start restful rpc
-	rpcServer := restful.Init(Port, tracker)
+	log.Info("start rpc")
+	rpcServer := restful.Init(Port, nil, dbService)
 	err = rpcServer.Start()
 	if err != nil {
 		utils.Fatalf("start rpc server error %v", err)
