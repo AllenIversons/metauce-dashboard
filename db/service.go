@@ -151,6 +151,7 @@ func (db *DBService) GetDetailRanking() ([]types.UserDetailInfo, error) {
 		addrList = append(addrList, types.UserDetailInfo{
 			Address:    common.HexToAddress(r.address),
 			TotalPower: r.total_power,
+			CarPower:   r.carpower,
 			CarNum:     r.carcnt,
 			MapNum:     r.mapcnt,
 			Rank:       r.ranking,
@@ -187,7 +188,7 @@ func (db *DBService) GetRanking() ([]types.AddressInfo, error) {
 }
 
 func (db *DBService) GetSingleUser(addr common.Address) (types.UserDetailInfo, error) {
-	sqlStr := "SELECT (total_power, carcnt, mapcnt, rank) from userinfo WHERE address=?"
+	sqlStr := "SELECT (total_power, carcnt, mapcnt,carpower, rank) from userinfo WHERE address=?"
 	rows, err := db.db.Query(sqlStr, addr.String())
 	if err != nil {
 		return types.UserDetailInfo{}, err
@@ -195,7 +196,7 @@ func (db *DBService) GetSingleUser(addr common.Address) (types.UserDetailInfo, e
 	for rows.Next() {
 		var userDetail types.UserDetailInfo
 		userDetail.Address = addr
-		err = rows.Scan(&userDetail.TotalPower, &userDetail.CarNum, &userDetail.MapNum, &userDetail.Rank)
+		err = rows.Scan(&userDetail.TotalPower, &userDetail.CarNum, &userDetail.MapNum, &userDetail.CarPower, &userDetail.Rank)
 		if err != nil {
 			return userDetail, nil
 		}

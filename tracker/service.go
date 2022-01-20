@@ -29,6 +29,7 @@ type DBService interface {
 	SetLastUserUpdateHeight(height uint64) error
 	PutCarInfo(tokenid int, power float64, level int, owner common.Address) error
 	PutMapInfo(tokenid int, level int, total float64, remain float64, owner common.Address) error
+	GetSingleUser(addr common.Address) (types.UserDetailInfo, error)
 }
 
 type RankingInfo struct {
