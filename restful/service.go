@@ -58,33 +58,33 @@ func (rpc *RPCService) Start() error {
 			log.Error("write response err", "err", err)
 		}
 	})
-	//r.HandleFunc("/addrrank/{address}", func(writer http.ResponseWriter, request *http.Request) {
-	//	vars := mux.Vars(request)
-	//	addrStr := vars["address"]
-	//	addr := common.HexToAddress(addrStr)
-	//	addrRank, err := rpc.tracker.GetAddressRank(addr)
-	//	if err != nil {
-	//		log.Error("tracker get address rank error", "err", err)
-	//		_, e := writer.Write([]byte{})
-	//		if e != nil {
-	//			log.Error("write response err", "err", err)
-	//		}
-	//		return
-	//	}
-	//	b, err := json.Marshal(addrRank)
-	//	if err != nil {
-	//		log.Error("json marshal address rank error", "err", err)
-	//		_, e := writer.Write([]byte{})
-	//		if e != nil {
-	//			log.Error("write response err", "err", err)
-	//		}
-	//		return
-	//	}
-	//	_, e := writer.Write(b)
-	//	if e != nil {
-	//		log.Error("write response err", "err", err)
-	//	}
-	//})
+	r.HandleFunc("/userrank/{address}", func(writer http.ResponseWriter, request *http.Request) {
+		vars := mux.Vars(request)
+		addrStr := vars["address"]
+		addr := common.HexToAddress(addrStr)
+		userDetail, err := rpc.db.GetSingleUser(addr)
+		if err != nil {
+			log.Error("tracker get address rank error", "err", err)
+			_, e := writer.Write([]byte{})
+			if e != nil {
+				log.Error("write response err", "err", err)
+			}
+			return
+		}
+		b, err := json.Marshal(userDetail)
+		if err != nil {
+			log.Error("json marshal address rank error", "err", err)
+			_, e := writer.Write([]byte{})
+			if e != nil {
+				log.Error("write response err", "err", err)
+			}
+			return
+		}
+		_, e := writer.Write(b)
+		if e != nil {
+			log.Error("write response err", "err", err)
+		}
+	})
 	go func() {
 		err := http.ListenAndServe(address, r)
 		if err != nil {

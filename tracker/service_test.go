@@ -70,3 +70,21 @@ func TestTrackService_OneInfoCheck(t *testing.T) {
 	fmt.Println(len(service.rankList))
 	fmt.Println(time.Now().Sub(start).Seconds())
 }
+
+func TestCheckOneAddress(t *testing.T) {
+	db, err := db2.Init(consts.Dbpassword, consts.Dburl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rpcurl := "https://stardust.metis.io/?owner=588"
+	playContract := common.HexToAddress("0x7Ab359a33F14C23571f79b62f1B8a5dc510c8070")
+	codeContract := common.HexToAddress("0xE5547D0378944B786BB38fB1bea4027052FC883E")
+	service := Init(db, rpcurl, playContract, codeContract, 10000)
+
+	testAddr := common.HexToAddress("0x9A1E6dc5f4344bdfFAb5F0FCABda31B5D3012Ba2")
+	info, err := service.checkOneAddress(testAddr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%v", info)
+}

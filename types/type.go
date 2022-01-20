@@ -13,10 +13,10 @@ type AddressInfo struct {
 	Power   float64
 }
 
-type AddressDetailInfo struct {
-	Address common.Address `json:"address"`
-	Power   float64        `json:"power"`
-	CarNum  int            `json:"car_num"`
-	MapNum  int            `json:"map_num"`
-	Rank    int            `json:"rank"`
+type UserDetailInfo struct {
+	Address    common.Address `json:"address"`
+	TotalPower float64        `json:"total_power"`
+	CarNum     int            `json:"car_num"`
+	MapNum     int            `json:"map_num"`
+	Rank       int            `json:"rank"`
 }

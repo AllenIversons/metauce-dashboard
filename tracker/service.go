@@ -27,6 +27,8 @@ type DBService interface {
 	PutUsers(addressList []common.Address) error
 	GetLastUserUpdateHeight() (uint64, error)
 	SetLastUserUpdateHeight(height uint64) error
+	PutCarInfo(tokenid int, power float64, level int, owner common.Address) error
+	PutMapInfo(tokenid int, level int, total float64, remain float64, owner common.Address) error
 }
 
 type RankingInfo struct {
@@ -212,7 +214,6 @@ func (s *TrackService) checkOneAddress(addr common.Address) (CacheInfo, error) {
 			log.Error("inveiteCodeInstance GetTotalPower error", "err", err)
 			continue
 		}
-		codePower.Div(codePower, big.NewInt(1e+18))
 
 		carsNFT, err := playInstance.GetUserCarNFT(&bind.CallOpts{Pending: false}, addr)
 		if err != nil {
@@ -223,9 +224,16 @@ func (s *TrackService) checkOneAddress(addr common.Address) (CacheInfo, error) {
 		carsNum := len(carsNFT)
 
 		for _, carNFT := range carsNFT {
+			if carNFT.Level.Cmp(big.NewInt(0)) == 0 {
+				continue
+			}
 			carPowerSum.Add(carPowerSum, carNFT.Power)
+			e := s.db.PutCarInfo(int(carNFT.TokenId.Uint64()), bigToFloat64(carNFT.Power), int(carNFT.Level.Uint64()), carNFT.Owner)
+			if e != nil {
+				fmt.Println(e)
+				log.Error("db PutCarInfo error", "err", e)
+			}
 		}
-		carPowerSum.Div(carPowerSum, big.NewInt(1e+18))
 
 		mapsNFT, err := playInstance.GetUserMapNFT(&bind.CallOpts{Pending: false}, addr)
 		if err != nil {
@@ -234,15 +242,29 @@ func (s *TrackService) checkOneAddress(addr common.Address) (CacheInfo, error) {
 			continue
 		}
 		mapsNum := len(mapsNFT)
+		remainSum := big.NewInt(0)
+		minedSum := big.NewInt(0)
+		for _, mapNFT := range mapsNFT {
+			remain := new(big.Int).Sub(mapNFT.TotalUsdt, mapNFT.ConsumeUsdt)
+			remainSum.Add(remainSum, remain)
+			minedSum.Add(minedSum, mapNFT.ConsumeUsdt)
+			e := s.db.PutMapInfo(int(mapNFT.TokenId.Uint64()), int(mapNFT.Level.Int64()), bigToFloat64(mapNFT.TotalUsdt), bigToFloat64(remain), mapNFT.Owner)
+			if e != nil {
+				fmt.Println(e)
+				log.Error("db PutCarInfo error", "err", e)
+			}
+		}
+
+		totalPower := new(big.Int).Add(codePower, carPowerSum)
 		userInfo := CacheInfo{
 			Address:   addr,
-			Power:     bigToFloat64(codePower) + bigToFloat64(carPowerSum),
+			Power:     bigToFloat64(totalPower),
 			CodePower: bigToFloat64(codePower),
 			CarPower:  bigToFloat64(carPowerSum),
 			CarNums:   carsNum,
 			MapNums:   mapsNum,
-			MapMined:  0,
-			MapRemain: 0,
+			MapMined:  bigToFloat64(minedSum),
+			MapRemain: bigToFloat64(remainSum),
 			Rank:      0,
 		}
 		return userInfo, nil
@@ -453,6 +475,10 @@ func (s *TrackService) OneUserCheck() error {
 }
 
 func bigToFloat64(num *big.Int) float64 {
-	numStr, _ := strconv.ParseFloat(num.String(), 32)
+	n := new(big.Int).Div(num, big.NewInt(1e+18))
+	mod := new(big.Int).Mod(num, big.NewInt(1e+18))
+	modInt := new(big.Int).Div(mod, big.NewInt(1e+16))
+	nStr := n.String() + "." + modInt.String()
+	numStr, _ := strconv.ParseFloat(nStr, 64)
 	return numStr
 }

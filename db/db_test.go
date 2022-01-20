@@ -99,3 +99,48 @@ func TestDBService_GetUsers(t *testing.T) {
 	}
 	fmt.Println(len(userList))
 }
+
+func TestDBService_Getcar(t *testing.T) {
+	db, err := Init(consts.Dbpassword, consts.Dburl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sqlStr := "SELECT * From carnft where level=4"
+	rows, err := db.db.Query(sqlStr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	i := 0
+	for rows.Next() {
+		i++
+		var car carnft
+		e := rows.Scan(&car.id, &car.level, &car.power, &car.owner, &car.tokenid)
+		if e != nil {
+			t.Fatal(e)
+		}
+	}
+	fmt.Println(i)
+}
+
+func TestDBService_Getmap(t *testing.T) {
+	db, err := Init(consts.Dbpassword, consts.Dburl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sqlStr := "SELECT * From mapnft where level=5"
+	rows, err := db.db.Query(sqlStr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	i := 0
+	for rows.Next() {
+		i++
+		var mapn mapnft
+		e := rows.Scan(&mapn.id, &mapn.tokenid, &mapn.level, &mapn.total, &mapn.remain, &mapn.owner)
+		if e != nil {
+			t.Fatal(e)
+		}
+	}
+
+	fmt.Println(i)
+}
