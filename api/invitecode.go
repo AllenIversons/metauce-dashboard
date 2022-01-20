@@ -40,7 +40,7 @@ type CodeIQLFInviteCode struct {
 
 // InvitecodeMetaData contains all meta data concerning the Invitecode contract.
 var InvitecodeMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"constant\":true},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\",\"payable\":true},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_code\",\"type\":\"string\"}],\"name\":\"isValidCode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"constant\":true},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"}],\"name\":\"checkUserInviteCodes\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"constant\":true},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_code\",\"type\":\"string\"}],\"name\":\"registerInviteCodes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_code\",\"type\":\"string\"}],\"name\":\"loginInviteCodes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"string[]\",\"name\":\"_codes\",\"type\":\"string[]\"}],\"name\":\"registerInviteCodesOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_allow\",\"type\":\"bool\"}],\"name\":\"addAllowAppore\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"getAllowAppore\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"constant\":true},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"getMyAllInviteCode\",\"outputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"allowUser\",\"type\":\"bool\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"power\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"attr1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"attr2\",\"type\":\"string\"}],\"internalType\":\"structCodeIQLF.InviteCode[]\",\"name\":\"_inviteCodes\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"constant\":true},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"getTotalPower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"constant\":true},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_power\",\"type\":\"uint256\"}],\"name\":\"inviteCodePower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"count\",\"type\":\"uint256\"}],\"name\":\"setMinResourceCount\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getMinResourceCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"constant\":true}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_code\",\"type\":\"string\"}],\"name\":\"isValidCode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"}],\"name\":\"checkUserInviteCodes\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_code\",\"type\":\"string\"}],\"name\":\"registerInviteCodes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_code\",\"type\":\"string\"}],\"name\":\"loginInviteCodes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"string[]\",\"name\":\"_codes\",\"type\":\"string[]\"}],\"name\":\"registerInviteCodesOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_allow\",\"type\":\"bool\"}],\"name\":\"addAllowAppore\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"getAllowAppore\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"getMyAllInviteCode\",\"outputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"allowUser\",\"type\":\"bool\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"power\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"attr1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"attr2\",\"type\":\"string\"}],\"internalType\":\"structCodeIQLF.InviteCode[]\",\"name\":\"_inviteCodes\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"getTotalPower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_power\",\"type\":\"uint256\"}],\"name\":\"inviteCodePower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_power\",\"type\":\"uint256\"}],\"name\":\"inviteCodePowerSub\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"count\",\"type\":\"uint256\"}],\"name\":\"setMinResourceCount\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getMinResourceCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_metisBalance\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"_metisSenderPause\",\"type\":\"bool\"}],\"name\":\"setMetisBalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_code\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"_recvAddress\",\"type\":\"address\"}],\"name\":\"airDropper\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recvAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_balance\",\"type\":\"uint256\"}],\"name\":\"withawOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_sigs\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_sigscode\",\"type\":\"address\"}],\"name\":\"setSigsPrivates\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"getAirDropper\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"data\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"verify\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // InvitecodeABI is the input ABI used to generate the binding from.
@@ -218,6 +218,37 @@ func (_Invitecode *InvitecodeSession) CheckUserInviteCodes(_address common.Addre
 // Solidity: function checkUserInviteCodes(address _address) view returns(bool)
 func (_Invitecode *InvitecodeCallerSession) CheckUserInviteCodes(_address common.Address) (bool, error) {
 	return _Invitecode.Contract.CheckUserInviteCodes(&_Invitecode.CallOpts, _address)
+}
+
+// GetAirDropper is a free data retrieval call binding the contract method 0x260aa0d6.
+//
+// Solidity: function getAirDropper(address _to) view returns(bool)
+func (_Invitecode *InvitecodeCaller) GetAirDropper(opts *bind.CallOpts, _to common.Address) (bool, error) {
+	var out []interface{}
+	err := _Invitecode.contract.Call(opts, &out, "getAirDropper", _to)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// GetAirDropper is a free data retrieval call binding the contract method 0x260aa0d6.
+//
+// Solidity: function getAirDropper(address _to) view returns(bool)
+func (_Invitecode *InvitecodeSession) GetAirDropper(_to common.Address) (bool, error) {
+	return _Invitecode.Contract.GetAirDropper(&_Invitecode.CallOpts, _to)
+}
+
+// GetAirDropper is a free data retrieval call binding the contract method 0x260aa0d6.
+//
+// Solidity: function getAirDropper(address _to) view returns(bool)
+func (_Invitecode *InvitecodeCallerSession) GetAirDropper(_to common.Address) (bool, error) {
+	return _Invitecode.Contract.GetAirDropper(&_Invitecode.CallOpts, _to)
 }
 
 // GetAllowAppore is a free data retrieval call binding the contract method 0x5ac17c2e.
@@ -406,6 +437,37 @@ func (_Invitecode *InvitecodeCallerSession) Owner() (common.Address, error) {
 	return _Invitecode.Contract.Owner(&_Invitecode.CallOpts)
 }
 
+// Verify is a free data retrieval call binding the contract method 0x85852ce4.
+//
+// Solidity: function verify(uint256 data, bytes signature) view returns(bool)
+func (_Invitecode *InvitecodeCaller) Verify(opts *bind.CallOpts, data *big.Int, signature []byte) (bool, error) {
+	var out []interface{}
+	err := _Invitecode.contract.Call(opts, &out, "verify", data, signature)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// Verify is a free data retrieval call binding the contract method 0x85852ce4.
+//
+// Solidity: function verify(uint256 data, bytes signature) view returns(bool)
+func (_Invitecode *InvitecodeSession) Verify(data *big.Int, signature []byte) (bool, error) {
+	return _Invitecode.Contract.Verify(&_Invitecode.CallOpts, data, signature)
+}
+
+// Verify is a free data retrieval call binding the contract method 0x85852ce4.
+//
+// Solidity: function verify(uint256 data, bytes signature) view returns(bool)
+func (_Invitecode *InvitecodeCallerSession) Verify(data *big.Int, signature []byte) (bool, error) {
+	return _Invitecode.Contract.Verify(&_Invitecode.CallOpts, data, signature)
+}
+
 // AddAllowAppore is a paid mutator transaction binding the contract method 0xff6a78f5.
 //
 // Solidity: function addAllowAppore(address _owner, bool _allow) returns()
@@ -425,6 +487,27 @@ func (_Invitecode *InvitecodeSession) AddAllowAppore(_owner common.Address, _all
 // Solidity: function addAllowAppore(address _owner, bool _allow) returns()
 func (_Invitecode *InvitecodeTransactorSession) AddAllowAppore(_owner common.Address, _allow bool) (*types.Transaction, error) {
 	return _Invitecode.Contract.AddAllowAppore(&_Invitecode.TransactOpts, _owner, _allow)
+}
+
+// AirDropper is a paid mutator transaction binding the contract method 0x604f142e.
+//
+// Solidity: function airDropper(string _code, address _recvAddress) returns()
+func (_Invitecode *InvitecodeTransactor) AirDropper(opts *bind.TransactOpts, _code string, _recvAddress common.Address) (*types.Transaction, error) {
+	return _Invitecode.contract.Transact(opts, "airDropper", _code, _recvAddress)
+}
+
+// AirDropper is a paid mutator transaction binding the contract method 0x604f142e.
+//
+// Solidity: function airDropper(string _code, address _recvAddress) returns()
+func (_Invitecode *InvitecodeSession) AirDropper(_code string, _recvAddress common.Address) (*types.Transaction, error) {
+	return _Invitecode.Contract.AirDropper(&_Invitecode.TransactOpts, _code, _recvAddress)
+}
+
+// AirDropper is a paid mutator transaction binding the contract method 0x604f142e.
+//
+// Solidity: function airDropper(string _code, address _recvAddress) returns()
+func (_Invitecode *InvitecodeTransactorSession) AirDropper(_code string, _recvAddress common.Address) (*types.Transaction, error) {
+	return _Invitecode.Contract.AirDropper(&_Invitecode.TransactOpts, _code, _recvAddress)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0x8129fc1c.
@@ -467,6 +550,27 @@ func (_Invitecode *InvitecodeSession) InviteCodePower(_address common.Address, _
 // Solidity: function inviteCodePower(address _address, uint256 _power) returns(uint256)
 func (_Invitecode *InvitecodeTransactorSession) InviteCodePower(_address common.Address, _power *big.Int) (*types.Transaction, error) {
 	return _Invitecode.Contract.InviteCodePower(&_Invitecode.TransactOpts, _address, _power)
+}
+
+// InviteCodePowerSub is a paid mutator transaction binding the contract method 0x27a6c952.
+//
+// Solidity: function inviteCodePowerSub(address _address, uint256 _power) returns(uint256)
+func (_Invitecode *InvitecodeTransactor) InviteCodePowerSub(opts *bind.TransactOpts, _address common.Address, _power *big.Int) (*types.Transaction, error) {
+	return _Invitecode.contract.Transact(opts, "inviteCodePowerSub", _address, _power)
+}
+
+// InviteCodePowerSub is a paid mutator transaction binding the contract method 0x27a6c952.
+//
+// Solidity: function inviteCodePowerSub(address _address, uint256 _power) returns(uint256)
+func (_Invitecode *InvitecodeSession) InviteCodePowerSub(_address common.Address, _power *big.Int) (*types.Transaction, error) {
+	return _Invitecode.Contract.InviteCodePowerSub(&_Invitecode.TransactOpts, _address, _power)
+}
+
+// InviteCodePowerSub is a paid mutator transaction binding the contract method 0x27a6c952.
+//
+// Solidity: function inviteCodePowerSub(address _address, uint256 _power) returns(uint256)
+func (_Invitecode *InvitecodeTransactorSession) InviteCodePowerSub(_address common.Address, _power *big.Int) (*types.Transaction, error) {
+	return _Invitecode.Contract.InviteCodePowerSub(&_Invitecode.TransactOpts, _address, _power)
 }
 
 // LoginInviteCodes is a paid mutator transaction binding the contract method 0x553fc285.
@@ -553,6 +657,27 @@ func (_Invitecode *InvitecodeTransactorSession) RenounceOwnership() (*types.Tran
 	return _Invitecode.Contract.RenounceOwnership(&_Invitecode.TransactOpts)
 }
 
+// SetMetisBalance is a paid mutator transaction binding the contract method 0xfe3538aa.
+//
+// Solidity: function setMetisBalance(uint256 _metisBalance, bool _metisSenderPause) returns()
+func (_Invitecode *InvitecodeTransactor) SetMetisBalance(opts *bind.TransactOpts, _metisBalance *big.Int, _metisSenderPause bool) (*types.Transaction, error) {
+	return _Invitecode.contract.Transact(opts, "setMetisBalance", _metisBalance, _metisSenderPause)
+}
+
+// SetMetisBalance is a paid mutator transaction binding the contract method 0xfe3538aa.
+//
+// Solidity: function setMetisBalance(uint256 _metisBalance, bool _metisSenderPause) returns()
+func (_Invitecode *InvitecodeSession) SetMetisBalance(_metisBalance *big.Int, _metisSenderPause bool) (*types.Transaction, error) {
+	return _Invitecode.Contract.SetMetisBalance(&_Invitecode.TransactOpts, _metisBalance, _metisSenderPause)
+}
+
+// SetMetisBalance is a paid mutator transaction binding the contract method 0xfe3538aa.
+//
+// Solidity: function setMetisBalance(uint256 _metisBalance, bool _metisSenderPause) returns()
+func (_Invitecode *InvitecodeTransactorSession) SetMetisBalance(_metisBalance *big.Int, _metisSenderPause bool) (*types.Transaction, error) {
+	return _Invitecode.Contract.SetMetisBalance(&_Invitecode.TransactOpts, _metisBalance, _metisSenderPause)
+}
+
 // SetMinResourceCount is a paid mutator transaction binding the contract method 0x2726f796.
 //
 // Solidity: function setMinResourceCount(uint256 count) returns()
@@ -574,6 +699,27 @@ func (_Invitecode *InvitecodeTransactorSession) SetMinResourceCount(count *big.I
 	return _Invitecode.Contract.SetMinResourceCount(&_Invitecode.TransactOpts, count)
 }
 
+// SetSigsPrivates is a paid mutator transaction binding the contract method 0xb9d025e5.
+//
+// Solidity: function setSigsPrivates(address _sigs, address _sigscode) returns()
+func (_Invitecode *InvitecodeTransactor) SetSigsPrivates(opts *bind.TransactOpts, _sigs common.Address, _sigscode common.Address) (*types.Transaction, error) {
+	return _Invitecode.contract.Transact(opts, "setSigsPrivates", _sigs, _sigscode)
+}
+
+// SetSigsPrivates is a paid mutator transaction binding the contract method 0xb9d025e5.
+//
+// Solidity: function setSigsPrivates(address _sigs, address _sigscode) returns()
+func (_Invitecode *InvitecodeSession) SetSigsPrivates(_sigs common.Address, _sigscode common.Address) (*types.Transaction, error) {
+	return _Invitecode.Contract.SetSigsPrivates(&_Invitecode.TransactOpts, _sigs, _sigscode)
+}
+
+// SetSigsPrivates is a paid mutator transaction binding the contract method 0xb9d025e5.
+//
+// Solidity: function setSigsPrivates(address _sigs, address _sigscode) returns()
+func (_Invitecode *InvitecodeTransactorSession) SetSigsPrivates(_sigs common.Address, _sigscode common.Address) (*types.Transaction, error) {
+	return _Invitecode.Contract.SetSigsPrivates(&_Invitecode.TransactOpts, _sigs, _sigscode)
+}
+
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
 //
 // Solidity: function transferOwnership(address newOwner) returns()
@@ -593,6 +739,27 @@ func (_Invitecode *InvitecodeSession) TransferOwnership(newOwner common.Address)
 // Solidity: function transferOwnership(address newOwner) returns()
 func (_Invitecode *InvitecodeTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
 	return _Invitecode.Contract.TransferOwnership(&_Invitecode.TransactOpts, newOwner)
+}
+
+// WithawOwner is a paid mutator transaction binding the contract method 0x35a57174.
+//
+// Solidity: function withawOwner(address _recvAddress, uint256 _balance) returns()
+func (_Invitecode *InvitecodeTransactor) WithawOwner(opts *bind.TransactOpts, _recvAddress common.Address, _balance *big.Int) (*types.Transaction, error) {
+	return _Invitecode.contract.Transact(opts, "withawOwner", _recvAddress, _balance)
+}
+
+// WithawOwner is a paid mutator transaction binding the contract method 0x35a57174.
+//
+// Solidity: function withawOwner(address _recvAddress, uint256 _balance) returns()
+func (_Invitecode *InvitecodeSession) WithawOwner(_recvAddress common.Address, _balance *big.Int) (*types.Transaction, error) {
+	return _Invitecode.Contract.WithawOwner(&_Invitecode.TransactOpts, _recvAddress, _balance)
+}
+
+// WithawOwner is a paid mutator transaction binding the contract method 0x35a57174.
+//
+// Solidity: function withawOwner(address _recvAddress, uint256 _balance) returns()
+func (_Invitecode *InvitecodeTransactorSession) WithawOwner(_recvAddress common.Address, _balance *big.Int) (*types.Transaction, error) {
+	return _Invitecode.Contract.WithawOwner(&_Invitecode.TransactOpts, _recvAddress, _balance)
 }
 
 // Receive is a paid mutator transaction binding the contract receive function.

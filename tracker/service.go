@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
-	"metauce-dashboard/api"
+	abi "metauce-dashboard/api"
 	"metauce-dashboard/types"
 	"strconv"
 	"sync/atomic"
